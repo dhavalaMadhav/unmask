@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — UNMASK</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #000000;
+      --accent: #0066FF;
+      --bg: #FFFFFF;
+      --text: #000000;
+      --text-muted: #666666;
+      --border: #E0E0E0;
+      --error: #FF3B30;
+      --success: #34C759;
+    }
+
+    body {
+      font-family: 'Helvetica Neue', 'Arial', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .form-section {
+      max-width: 480px;
+    }
+
+    .back-link {
+      display: inline-block;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 3rem;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: var(--primary);
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      margin-bottom: 3rem;
+      font-size: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 2rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      color: var(--text);
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: var(--primary);
+      color: #FFFFFF;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 1rem;
+    }
+
+    .btn:hover {
+      background: var(--accent);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .footer-link {
+      margin-top: 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .footer-link a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .footer-link a:hover {
+      text-decoration: underline;
+    }
+
+    .alert {
+      padding: 1rem;
+      margin-bottom: 2rem;
+      border-left: 4px solid;
+      font-size: 0.9rem;
+    }
+
+    .alert-error {
+      background: rgba(255, 59, 48, 0.1);
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .alert-success {
+      background: rgba(52, 199, 89, 0.1);
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .info-section {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 3rem;
+      background: #F8F8F8;
+      border-left: 1px solid var(--border);
+    }
+
+    .info-section h2 {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      text-transform: uppercase;
+    }
+
+    .feature {
+      margin-bottom: 2rem;
+      padding-left: 2rem;
+      position: relative;
+    }
+
+    .feature::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .feature h3 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    .feature p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 968px) {
+      .container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .info-section {
+        order: -1;
+        border-left: none;
+        border-top: 1px solid var(--border);
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .info-section h2 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="form-section">
+      <a href="/" class="back-link">← BACK</a>
+      <h1>REGISTER</h1>
+      <p class="subtitle">Create your anonymous account</p>
+
+      <div id="alert-container"></div>
+
+      <form id="register-form">
+        <div class="form-group">
+          <label for="email">EMAIL</label>
+          <input type="email" id="email" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label for="password">PASSWORD</label>
+          <input type="password" id="password" required minlength="6" autocomplete="new-password">
+        </div>
+
+        <button type="submit" class="btn" id="submit-btn">CREATE ACCOUNT</button>
+      </form>
+
+      <div class="footer-link">
+        Already registered? <a href="/login">Login here</a>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <h2>WHY UNMASK?</h2>
+      
+      <div class="feature">
+        <h3>Complete Anonymity</h3>
+        <p>Your real identity is never revealed. Express yourself freely without fear of judgment.</p>
+      </div>
+
+      <div class="feature">
+        <h3>Real-Time Support</h3>
+        <p>Connect with others instantly. Share experiences and receive support in the moment you need it.</p>
+      </div>
+
+      <div class="feature">
+        <h3>Safe Spaces</h3>
+        <p>Dedicated rooms for specific topics. Find the right community for your concerns.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = window.location.origin + '/api';
+    const form = document.getElementById('register-form');
+    const alertContainer = document.getElementById('alert-container');
+    const submitBtn = document.getElementById('submit-btn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'CREATING...';
+      alertContainer.innerHTML = '';
+
+      try {
+        const response = await fetch(`${API_URL}/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alertContainer.innerHTML = `
+            <div class="alert alert-success">
+              SUCCESS! Your anonymous name is: <strong>${data.anonName}</strong><br>
+              Redirecting to login...
+            </div>
+          `;
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 2000);
+        } else {
+          alertContainer.innerHTML = `
+            <div class="alert alert-error">${data.error}</div>
+          `;
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'CREATE ACCOUNT';
+        }
+      } catch (error) {
+        alertContainer.innerHTML = `
+          <div class="alert alert-error">Network error. Please try again.</div>
+        `;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'CREATE ACCOUNT';
+      }
+    });
+  </script>
+</body>
+</html>

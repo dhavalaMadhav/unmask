@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — UNMASK</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #000000;
+      --accent: #0066FF;
+      --bg: #FFFFFF;
+      --text: #000000;
+      --text-muted: #666666;
+      --border: #E0E0E0;
+    }
+
+    body {
+      font-family: 'Helvetica Neue', 'Arial', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .header {
+      border-bottom: 2px solid var(--primary);
+      padding: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .anon-badge {
+      padding: 0.75rem 1.5rem;
+      background: var(--primary);
+      color: #FFFFFF;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+    }
+
+    .btn-logout {
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: var(--primary);
+      color: #FFFFFF;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      margin-bottom: 3rem;
+      font-weight: 600;
+    }
+
+    .rooms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2px;
+      background: var(--border);
+    }
+
+    .room-card {
+      background: var(--bg);
+      padding: 3rem 2rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .room-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      transition: width 0.3s;
+    }
+
+    .room-card:hover {
+      background: #F8F8F8;
+      transform: translateX(4px);
+    }
+
+    .room-card:hover::before {
+      width: 100%;
+    }
+
+    .room-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .room-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    .room-arrow {
+      font-size: 1.5rem;
+      color: var(--accent);
+      transition: transform 0.3s;
+    }
+
+    .room-card:hover .room-arrow {
+      transform: translateX(8px);
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        padding: 1.5rem;
+      }
+
+      .header h1 {
+        font-size: 1.5rem;
+        width: 100%;
+      }
+
+      .header-right {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .container {
+        padding: 2rem 1rem;
+      }
+
+      .rooms-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .room-card {
+        padding: 2rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>UNMASK</h1>
+    <div class="header-right">
+      <div class="anon-badge" id="anon-name">LOADING...</div>
+      <button class="btn-logout" id="logout-btn">LOGOUT</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2 class="section-title">SELECT A SUPPORT ROOM</h2>
+    <div class="rooms-grid" id="rooms-container">
+      <!-- Rooms will be loaded here -->
+    </div>
+  </div>
+
+  <script>
+    const API_URL = window.location.origin + '/api';
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      window.location.href = '/login';
+    }
+
+    // Load user info
+    async function loadUserInfo() {
+      try {
+        const response = await fetch(`${API_URL}/auth/me`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+          return;
+        }
+
+        const data = await response.json();
+        document.getElementById('anon-name').textContent = data.anonName;
+      } catch (error) {
+        console.error('Error loading user info:', error);
+      }
+    }
+
+    // Load rooms
+    async function loadRooms() {
+      try {
+        const response = await fetch(`${API_URL}/chat/rooms`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+        const container = document.getElementById('rooms-container');
+
+        container.innerHTML = data.rooms.map(room => `
+          <div class="room-card" onclick="joinRoom('${room.id}', '${room.name}')">
+            <h3>${room.name}</h3>
+            <p>${room.description}</p>
+            <div class="room-arrow">→</div>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('Error loading rooms:', error);
+      }
+    }
+
+    function joinRoom(roomId, roomName) {
+      localStorage.setItem('currentRoom', roomId);
+      localStorage.setItem('currentRoomName', roomName);
+      window.location.href = '/chat';
+    }
+
+    // Logout
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.clear();
+      window.location.href = '/';
+    });
+
+    // Initialize
+    loadUserInfo();
+    loadRooms();
+  </script>
+</body>
+</html>
