@@ -14,7 +14,10 @@ const auth = require('./middleware/auth');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  maxHttpBufferSize: 1e8, // 100 MB (increase for large files)
+  pingTimeout: 60000      // 60 seconds (give time for large uploads)
+});
 
 // Connect to MongoDB
 connectDB();
@@ -266,41 +269,140 @@ io.on('connection', (socket) => {
   });
 
   const messageTimestamps = [];
-  socket.on('message', async ({ room, text }) => {
-    try {
-      const now = Date.now();
-      messageTimestamps.push(now);
-      const recentMessages = messageTimestamps.filter(t => now - t < 10000);
-      
-      if (recentMessages.length > 5) {
-        socket.emit('error', { message: 'Slow down! Too many messages.' });
-        return;
-      }
 
-      const sanitizedText = text.trim().substring(0, 500);
-      
-      if (!sanitizedText) return;
+  // In your io.on('connection', (socket) => { ... }) section, add these handlers:
 
-      const message = new Message({
-        room,
-        senderAnonName: socket.anonName,
-        senderUserId: socket.userId,
-        message: sanitizedText
-      });
-
-      await message.save();
-
-      io.to(room).emit('message', {
-        anonName: socket.anonName,
-        message: sanitizedText,
-        timestamp: message.timestamp
-      });
-
-    } catch (error) {
-      console.error('Message error:', error);
-      socket.emit('error', { message: 'Failed to send message' });
+// Edit message
+socket.on('editMessage', async ({ messageId, newText, room }) => {
+  try {
+    const message = await Message.findById(messageId);
+    
+    if (!message) {
+      return socket.emit('error', { message: 'Message not found' });
     }
-  });
+
+    // Verify ownership
+    if (message.senderUserId.toString() !== socket.userId) {
+      return socket.emit('error', { message: 'Unauthorized to edit this message' });
+    }
+
+    // Check if within 10 minute edit window
+    const now = Date.now();
+    const messageTime = new Date(message.timestamp).getTime();
+    const timeDiff = now - messageTime;
+    const tenMinutes = 10 * 60 * 1000; // 10 minutes in milliseconds
+
+    if (timeDiff > tenMinutes) {
+      return socket.emit('error', { message: 'Edit time limit exceeded (10 minutes)' });
+    }
+
+    // Only allow editing text messages
+    if (message.messageType !== 'text') {
+      return socket.emit('error', { message: 'Cannot edit media messages' });
+    }
+
+    // Update message
+    message.message = newText.trim().substring(0, 500);
+    message.isEdited = true;
+    message.editedAt = new Date();
+    await message.save();
+
+    // Broadcast edit to all users in room
+    io.to(room).emit('messageEdited', {
+      messageId: messageId,
+      newText: message.message,
+      isEdited: true,
+      editedAt: message.editedAt
+    });
+
+  } catch (error) {
+    console.error('Edit message error:', error);
+    socket.emit('error', { message: 'Failed to edit message' });
+  }
+});
+
+// Delete messages
+socket.on('deleteMessages', async ({ messageIds, room }) => {
+  try {
+    // Verify all messages belong to this user
+    const messages = await Message.find({
+      _id: { $in: messageIds },
+      senderUserId: socket.userId
+    });
+
+    if (messages.length !== messageIds.length) {
+      return socket.emit('error', { message: 'Cannot delete messages from other users' });
+    }
+
+    // Delete messages
+    await Message.deleteMany({
+      _id: { $in: messageIds },
+      senderUserId: socket.userId
+    });
+
+    // Broadcast deletion to all users in room
+    io.to(room).emit('messagesDeleted', {
+      messageIds: messageIds
+    });
+
+    console.log(`${socket.anonName} deleted ${messageIds.length} message(s)`);
+
+  } catch (error) {
+    console.error('Delete messages error:', error);
+    socket.emit('error', { message: 'Failed to delete messages' });
+  }
+});
+
+// In your socket.on('message') handler, replace with this:
+socket.on('message', async ({ room, text, type = 'text', fileName, fileSize }) => {
+  try {
+    const now = Date.now();
+    messageTimestamps.push(now);
+    const recentMessages = messageTimestamps.filter(t => now - t < 10000);
+    
+    if (recentMessages.length > 10) {
+      socket.emit('error', { message: 'Slow down! Too many messages.' });
+      return;
+    }
+
+    if (!text) return;
+
+    const message = new Message({
+      room,
+      senderAnonName: socket.anonName,
+      senderUserId: socket.userId,
+      messageType: type,
+      message: text,
+      fileName: fileName || null,
+      fileSize: fileSize || null
+    });
+
+    await message.save();
+
+    // FIXED: Added messageId to the emit
+    io.to(room).emit('message', {
+      messageId: message._id.toString(),  // ← THIS WAS MISSING!
+      anonName: socket.anonName,
+      userId: socket.userId,
+      message: text,
+      messageType: type,
+      fileName: fileName,
+      timestamp: message.timestamp
+    });
+
+    // Send notification to all users except sender
+    socket.to(room).emit('notification', {
+      message: `${socket.anonName} sent a message`,
+      room: room
+    });
+
+  } catch (error) {
+    console.error('Message error:', error);
+    socket.emit('error', { message: 'Failed to send message' });
+  }
+});
+
+
 
   socket.on('typing', ({ room }) => {
     socket.to(room).emit('typing', { anonName: socket.anonName });

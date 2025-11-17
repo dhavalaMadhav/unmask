@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 
-// User Schema
+// User Schema (unchanged)
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
   }
 });
 
-// Message Schema
+// Updated Message Schema with edit tracking
 const messageSchema = new mongoose.Schema({
   room: {
     type: String,
@@ -43,10 +43,28 @@ const messageSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  messageType: {
+    type: String,
+    enum: ['text', 'image', 'file', 'audio'],
+    default: 'text'
+  },
   message: {
     type: String,
     required: true,
-    maxlength: 500
+    maxlength: 5000000
+  },
+  fileName: {
+    type: String
+  },
+  fileSize: {
+    type: Number
+  },
+  isEdited: {
+    type: Boolean,
+    default: false
+  },
+  editedAt: {
+    type: Date
   },
   timestamp: {
     type: Date,

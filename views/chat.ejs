@@ -19,6 +19,8 @@
       --text: #000000;
       --text-muted: #666666;
       --border: #E0E0E0;
+      --my-message: #0066FF;
+      --other-message: #F0F0F0;
     }
 
     body {
@@ -34,16 +36,24 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
+      padding-top: 70px;
     }
 
+    /* Fixed Transparent Header */
     .header {
-      border-bottom: 2px solid var(--primary);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       padding: 1.5rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: var(--bg);
-      flex-shrink: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
 
     .header h1 {
@@ -65,12 +75,19 @@
       cursor: pointer;
       transition: all 0.2s;
       text-decoration: none;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .btn-back:hover {
       background: var(--primary);
       color: #FFFFFF;
+    }
+
+    .btn-back svg {
+      width: 16px;
+      height: 16px;
     }
 
     .chat-body {
@@ -92,20 +109,22 @@
       padding: 2rem;
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 0.5rem;
     }
 
-    .message {
+    /* Message Groups */
+    .message-group {
       display: flex;
       flex-direction: column;
-      max-width: 70%;
+      margin-bottom: 1rem;
     }
 
-    .message-header {
-      display: flex;
-      align-items: baseline;
-      gap: 1rem;
-      margin-bottom: 0.5rem;
+    .message-group.my-messages {
+      align-items: flex-end;
+    }
+
+    .message-group.other-messages {
+      align-items: flex-start;
     }
 
     .message-author {
@@ -113,22 +132,313 @@
       font-size: 0.85rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      padding: 0 1rem;
+    }
+
+    .message {
+      max-width: 70%;
+      margin-bottom: 0.3rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: padding-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Message Checkbox - Smooth appearance */
+    .message-checkbox {
+      display: none;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: var(--accent);
+      opacity: 0;
+      transform: translateX(-10px) scale(0.7);
+      transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                  transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .delete-mode-active .my-messages .message-checkbox {
+      display: block;
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+
+    /* Stagger animation for multiple checkboxes */
+    .delete-mode-active .my-messages .message:nth-child(2) .message-checkbox {
+      transition-delay: 0.05s;
+    }
+
+    .delete-mode-active .my-messages .message:nth-child(3) .message-checkbox {
+      transition-delay: 0.1s;
+    }
+
+    .delete-mode-active .my-messages .message:nth-child(4) .message-checkbox {
+      transition-delay: 0.15s;
+    }
+
+    .delete-mode-active .my-messages .message:nth-child(5) .message-checkbox {
+      transition-delay: 0.2s;
+    }
+
+    .delete-mode-active .my-messages .message:nth-child(n+6) .message-checkbox {
+      transition-delay: 0.25s;
+    }
+
+    .delete-mode-active .my-messages .message {
+      padding-left: 0.5rem;
+    }
+
+    .my-messages .message {
+      flex-direction: row-reverse;
+    }
+
+/* Message content - clean base */
+.message-content {
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  word-wrap: break-word;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  position: relative;
+  flex: 1;
+}
+
+.my-messages .message-content {
+  background: var(--my-message);
+  color: #FFFFFF;
+  border-bottom-right-radius: 4px;
+}
+
+.other-messages .message-content {
+  background: var(--other-message);
+  color: var(--text);
+  border-bottom-left-radius: 4px;
+}
+
+/* Subtle gradient at top-right corner (WhatsApp style) */
+.my-messages .message-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 40px;
+  background: linear-gradient( -135deg, rgba(0, 0, 0, 0.466) 0%, transparent 70%);
+  border-top-right-radius: 12px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.other-messages .message-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 40px;
+  background: linear-gradient(to bottom right, rgba(0, 0, 0, 0.04) 0%, transparent 70%);
+  border-top-right-radius: 12px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.message:hover .message-content::before {
+  opacity: 1;
+}
+
+/* Arrow button - transparent, no background */
+.message-menu-btn {
+  display: none;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  opacity: 0;
+  transform: scale(0.85);
+  z-index: 10;
+}
+
+.message-menu-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: rgba(255, 255, 255, 0.85);
+  stroke-width: 2;
+  fill: none;
+  transition: all 0.2s ease;
+}
+
+.other-messages .message-menu-btn svg {
+  stroke: rgba(0, 0, 0, 0.6);
+}
+
+.message:hover .message-menu-btn {
+  display: flex;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.message-menu-btn:hover svg {
+  transform: translateY(1px);
+  stroke: rgba(255, 255, 255, 1);
+}
+
+.other-messages .message-menu-btn:hover svg {
+  stroke: rgba(0, 0, 0, 0.8);
+}
+
+    .message:hover .message-menu-btn {
+      display: flex;
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .message-menu-btn:hover {
+      background: rgba(0, 0, 0, 0.25);
+      transform: scale(1.1);
+    }
+
+    .my-messages .message-menu-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Dropdown Menu */
+    .message-dropdown {
+      position: absolute;
+      top: 100%;
+      right: -5px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 100;
+      display: none;
+      min-width: 150px;
+      margin-top: 0.5rem;
+      opacity: 0;
+      transform: translateY(-10px) scale(0.95);
+      transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .message-dropdown.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .dropdown-item {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    .dropdown-item:hover {
+      background: var(--bg-alt);
+    }
+
+    .dropdown-item svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .dropdown-item.delete {
+      color: #FF3B30;
+    }
+
+    /* Edited Badge */
+    .edited-badge {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.7);
+      font-style: italic;
+      margin-left: 0.5rem;
+    }
+
+    .other-messages .edited-badge {
+      color: var(--text-muted);
     }
 
     .message-time {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      padding: 0 1rem;
+      margin-top: 0.3rem;
     }
 
-    .message-content {
-      background: var(--bg-alt);
-      padding: 1rem 1.5rem;
-      border-left: 2px solid var(--primary);
-      word-wrap: break-word;
-      font-size: 0.95rem;
-      line-height: 1.6;
+    /* Image/File/Audio Messages */
+    .message-image {
+      max-width: 300px;
+      max-height: 400px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: block;
+    }
+
+    .message-file {
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      cursor: pointer;
+    }
+
+    .file-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    .file-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .file-info {
+      flex: 1;
+    }
+
+    .file-name {
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .file-size {
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+
+    .message-audio {
+      width: 250px;
     }
 
     .system-message {
@@ -149,16 +459,223 @@
       min-height: 1.5rem;
     }
 
-    .message-input-container {
-      padding: 2rem;
-      background: var(--bg);
-      border-top: 2px solid var(--border);
-      display: flex;
-      gap: 1rem;
-      flex-shrink: 0;
+    /* Edit Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
     }
 
-    .message-input-container input {
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal h3 {
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal textarea {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      resize: vertical;
+      min-height: 100px;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    .modal-btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .modal-btn-primary:hover {
+      background: var(--accent);
+    }
+
+    .modal-btn-secondary {
+      background: transparent;
+      border: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    .modal-btn-secondary:hover {
+      border-color: var(--primary);
+    }
+
+    /* Delete Mode Bar - Smooth slide up animation */
+    .delete-mode-bar {
+      padding: 1.5rem 2rem;
+      background: #FF3B30;
+      color: white;
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 2px solid rgba(255, 255, 255, 0.2);
+      flex-shrink: 0;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .delete-mode-bar.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delete-mode-info {
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+    }
+
+    .delete-mode-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .delete-mode-btn {
+      padding: 0.75rem 1.5rem;
+      border: 2px solid white;
+      background: transparent;
+      color: white;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .delete-mode-btn:hover {
+      background: white;
+      color: #FF3B30;
+    }
+
+    .delete-mode-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Input Container - Smooth slide down animation */
+    .message-input-container {
+      padding: 1.5rem 2rem;
+      background: var(--bg);
+      border-top: 2px solid var(--border);
+      flex-shrink: 0;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .delete-mode-active .message-input-container {
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-end;
+    }
+
+    .input-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .input-btn {
+      width: 40px;
+      height: 40px;
+      border: 2px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      padding: 0;
+    }
+
+    .input-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--text);
+      transition: stroke 0.2s;
+    }
+
+    .input-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .input-btn:hover svg {
+      stroke: var(--accent);
+    }
+
+    .input-btn.recording {
+      background: #FF3B30;
+      border-color: #FF3B30;
+      animation: pulse 1.5s infinite;
+    }
+
+    .input-btn.recording svg {
+      stroke: white;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .message-input {
       flex: 1;
       padding: 1rem;
       font-size: 0.95rem;
@@ -166,10 +683,12 @@
       border: 2px solid var(--border);
       color: var(--text);
       font-family: inherit;
-      transition: border-color 0.2s;
+      resize: none;
+      max-height: 120px;
+      min-height: 40px;
     }
 
-    .message-input-container input:focus {
+    .message-input:focus {
       outline: none;
       border-color: var(--accent);
     }
@@ -185,12 +704,83 @@
       font-size: 0.85rem;
       letter-spacing: 0.05em;
       transition: background 0.2s;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .btn-send:hover {
       background: var(--accent);
     }
 
+    .btn-send svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* File Preview */
+    .file-preview {
+      padding: 1rem 2rem;
+      background: var(--bg-alt);
+      border-top: 1px solid var(--border);
+      display: none;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .file-preview.active {
+      display: flex;
+    }
+
+    .preview-image {
+      max-height: 100px;
+      border-radius: 4px;
+    }
+
+    .preview-info {
+      flex: 1;
+    }
+
+    .btn-remove {
+      padding: 0.5rem 1rem;
+      background: #FF3B30;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-remove svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Notification Toast */
+    .notification-toast {
+      position: fixed;
+      top: 90px;
+      right: 2rem;
+      background: var(--primary);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: translateX(400px);
+      transition: transform 0.3s;
+      z-index: 1001;
+      max-width: 300px;
+    }
+
+    .notification-toast.show {
+      transform: translateX(0);
+    }
+
+    /* Sidebar */
     .sidebar {
       width: 280px;
       background: var(--bg-alt);
@@ -223,7 +813,23 @@
       font-weight: 600;
     }
 
+    input[type="file"] {
+      display: none;
+    }
+
     @media (max-width: 968px) {
+      .chat-container {
+        padding-top: 60px;
+      }
+
+      .header {
+        padding: 1rem;
+      }
+
+      .header h1 {
+        font-size: 1.2rem;
+      }
+
       .chat-body {
         flex-direction: column;
       }
@@ -238,16 +844,28 @@
         max-height: 200px;
       }
 
-      .header {
+      .message {
+        max-width: 85%;
+      }
+
+      .notification-toast {
+        right: 1rem;
+        left: 1rem;
+        max-width: none;
+      }
+
+      .delete-mode-bar {
+        flex-direction: column;
+        gap: 1rem;
         padding: 1rem;
       }
 
-      .header h1 {
-        font-size: 1.2rem;
+      .delete-mode-actions {
+        width: 100%;
       }
 
-      .message {
-        max-width: 90%;
+      .delete-mode-btn {
+        flex: 1;
       }
     }
 
@@ -270,19 +888,84 @@
   </style>
 </head>
 <body>
-  <div class="chat-container">
+  <div class="notification-toast" id="notification-toast"></div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal">
+      <h3>EDIT MESSAGE</h3>
+      <textarea id="edit-textarea" placeholder="Edit your message..."></textarea>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-secondary" id="cancel-edit">CANCEL</button>
+        <button class="modal-btn modal-btn-primary" id="save-edit">SAVE</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-container" id="chat-container">
     <div class="header">
       <h1 id="room-name">LOADING...</h1>
-      <a href="/dashboard" class="btn-back">← BACK</a>
+      <a href="/dashboard" class="btn-back">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        BACK
+      </a>
     </div>
 
     <div class="chat-body">
       <div class="messages-section">
         <div class="messages-container" id="messages"></div>
         <div class="typing-indicator" id="typing-indicator"></div>
+        
+        <div class="file-preview" id="file-preview">
+          <img class="preview-image" id="preview-image" style="display:none;">
+          <div class="preview-info">
+            <div id="preview-name"></div>
+            <div id="preview-size" style="font-size: 0.85rem; color: var(--text-muted);"></div>
+          </div>
+          <button class="btn-remove" id="remove-file">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            REMOVE
+          </button>
+        </div>
+
+        <!-- Delete Mode Bar - Replaces input area -->
+        <div class="delete-mode-bar" id="delete-mode-bar">
+          <div class="delete-mode-info">
+            <span id="selected-count">0</span> MESSAGE<span id="plural-s">S</span> SELECTED
+          </div>
+          <div class="delete-mode-actions">
+            <button class="delete-mode-btn" id="confirm-delete">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+              </svg>
+              DELETE
+            </button>
+            <button class="delete-mode-btn" id="cancel-delete">CANCEL</button>
+          </div>
+        </div>
+
+        <!-- Normal Input Container -->
         <div class="message-input-container">
-          <input type="text" id="message-input" placeholder="TYPE YOUR MESSAGE..." maxlength="500">
-          <button class="btn-send" id="send-btn">SEND</button>
+          <div class="input-wrapper">
+            <div class="input-actions">
+              <button class="input-btn" id="attach-file" title="Attach file">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              </button>
+              <button class="input-btn" id="attach-image" title="Send image">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+              </button>
+              <button class="input-btn" id="voice-record" title="Voice message">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+              </button>
+              <input type="file" id="file-input" accept="*/*">
+              <input type="file" id="image-input" accept="image/*">
+            </div>
+            <textarea class="message-input" id="message-input" placeholder="TYPE YOUR MESSAGE..." rows="1"></textarea>
+            <button class="btn-send" id="send-btn">
+              SEND
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -301,6 +984,7 @@
     const anonName = localStorage.getItem('anonName');
     const currentRoom = localStorage.getItem('currentRoom');
     const currentRoomName = localStorage.getItem('currentRoomName');
+    let myUserId = localStorage.getItem('userId');
 
     if (!token || !currentRoom) {
       window.location.href = '/dashboard';
@@ -309,7 +993,9 @@
     document.getElementById('room-name').textContent = currentRoomName;
 
     const socket = io(SOCKET_URL, {
-      auth: { token: token }
+      auth: { token: token },
+      maxHttpBufferSize: 1e8,
+      pingTimeout: 60000
     });
 
     const messagesContainer = document.getElementById('messages');
@@ -317,8 +1003,278 @@
     const sendBtn = document.getElementById('send-btn');
     const onlineUsersList = document.getElementById('online-users');
     const typingIndicator = document.getElementById('typing-indicator');
+    const notificationToast = document.getElementById('notification-toast');
+    const chatContainer = document.getElementById('chat-container');
+    const deleteModeBar = document.getElementById('delete-mode-bar');
+    const selectedCountEl = document.getElementById('selected-count');
+    const editModal = document.getElementById('edit-modal');
+    const editTextarea = document.getElementById('edit-textarea');
 
-    // Load chat history
+    let isDeleteMode = false;
+    let selectedMessages = new Set();
+    let currentEditMessageId = null;
+    let selectedFile = null;
+    let selectedFileType = 'file';
+
+    document.getElementById('attach-file').addEventListener('click', () => {
+      document.getElementById('file-input').click();
+    });
+
+    document.getElementById('attach-image').addEventListener('click', () => {
+      document.getElementById('image-input').click();
+    });
+
+    document.getElementById('file-input').addEventListener('change', (e) => {
+      handleFileSelect(e.target.files[0], 'file');
+    });
+
+    document.getElementById('image-input').addEventListener('change', (e) => {
+      handleFileSelect(e.target.files[0], 'image');
+    });
+
+    document.getElementById('remove-file').addEventListener('click', () => {
+      selectedFile = null;
+      document.getElementById('file-preview').classList.remove('active');
+      document.getElementById('file-input').value = '';
+      document.getElementById('image-input').value = '';
+    });
+
+    function handleFileSelect(file, type) {
+      if (!file) return;
+      
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File size must be less than 10MB');
+        return;
+      }
+
+      selectedFileType = type;
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        if (type === 'image') {
+          compressImage(e.target.result, file.name, (compressedData) => {
+            selectedFile = {
+              data: compressedData,
+              name: file.name,
+              size: compressedData.length,
+              type: file.type
+            };
+            showPreview(compressedData, file.name, compressedData.length);
+          });
+        } else {
+          selectedFile = {
+            data: e.target.result,
+            name: file.name,
+            size: file.size,
+            type: file.type
+          };
+          showPreview(e.target.result, file.name, file.size);
+        }
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    function compressImage(base64, fileName, callback) {
+      const img = new Image();
+      img.src = base64;
+      
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        const maxWidth = 1920;
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const compressed = canvas.toDataURL('image/jpeg', 0.8);
+        callback(compressed);
+      };
+    }
+
+    function showPreview(data, name, size) {
+      document.getElementById('preview-name').textContent = name;
+      document.getElementById('preview-size').textContent = formatFileSize(size);
+      
+      if (selectedFileType === 'image') {
+        document.getElementById('preview-image').src = data;
+        document.getElementById('preview-image').style.display = 'block';
+      } else {
+        document.getElementById('preview-image').style.display = 'none';
+      }
+      
+      document.getElementById('file-preview').classList.add('active');
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    let mediaRecorder;
+    let audioChunks = [];
+    let isRecording = false;
+
+    document.getElementById('voice-record').addEventListener('click', toggleVoiceRecording);
+
+    async function toggleVoiceRecording() {
+      const btn = document.getElementById('voice-record');
+      
+      if (!isRecording) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+
+          mediaRecorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
+          };
+
+          mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              sendMessage(e.target.result, 'audio', 'voice-message.webm', audioBlob.size);
+            };
+            reader.readAsDataURL(audioBlob);
+            
+            stream.getTracks().forEach(track => track.stop());
+          };
+
+          mediaRecorder.start();
+          isRecording = true;
+          btn.classList.add('recording');
+          btn.title = 'Stop recording';
+        } catch (error) {
+          alert('Could not access microphone: ' + error.message);
+        }
+      } else {
+        mediaRecorder.stop();
+        isRecording = false;
+        btn.classList.remove('recording');
+        btn.title = 'Voice message';
+      }
+    }
+
+    function enterDeleteMode() {
+      isDeleteMode = true;
+      selectedMessages.clear();
+      chatContainer.classList.add('delete-mode-active');
+      deleteModeBar.classList.add('active');
+      updateSelectedCount();
+      closeAllDropdowns();
+    }
+
+    function exitDeleteMode() {
+      isDeleteMode = false;
+      selectedMessages.clear();
+      chatContainer.classList.remove('delete-mode-active');
+      deleteModeBar.classList.remove('active');
+      
+      document.querySelectorAll('.message-checkbox').forEach(cb => {
+        cb.checked = false;
+      });
+    }
+
+    function updateSelectedCount() {
+      const count = selectedMessages.size;
+      selectedCountEl.textContent = count;
+      
+      const pluralS = document.getElementById('plural-s');
+      if (pluralS) {
+        pluralS.style.display = count === 1 ? 'none' : 'inline';
+      }
+    }
+
+    function canEditMessage(timestamp) {
+      const now = Date.now();
+      const messageTime = new Date(timestamp).getTime();
+      const timeDiff = now - messageTime;
+      const tenMinutes = 10 * 60 * 1000;
+      return timeDiff <= tenMinutes;
+    }
+
+    function openEditModal(messageId, currentText, timestamp) {
+      if (!canEditMessage(timestamp)) {
+        alert('Cannot edit message after 10 minutes');
+        return;
+      }
+
+      currentEditMessageId = messageId;
+      editTextarea.value = currentText;
+      editModal.classList.add('active');
+      editTextarea.focus();
+    }
+
+    function closeEditModal() {
+      editModal.classList.remove('active');
+      currentEditMessageId = null;
+      editTextarea.value = '';
+    }
+
+    function saveEdit() {
+      const newText = editTextarea.value.trim();
+      if (!newText || !currentEditMessageId) return;
+
+      socket.emit('editMessage', {
+        messageId: currentEditMessageId,
+        newText: newText,
+        room: currentRoom
+      });
+
+      closeEditModal();
+    }
+
+    document.getElementById('cancel-edit').addEventListener('click', closeEditModal);
+    document.getElementById('save-edit').addEventListener('click', saveEdit);
+
+    editModal.addEventListener('click', (e) => {
+      if (e.target === editModal) {
+        closeEditModal();
+      }
+    });
+
+    document.getElementById('cancel-delete').addEventListener('click', exitDeleteMode);
+
+    document.getElementById('confirm-delete').addEventListener('click', () => {
+      if (selectedMessages.size === 0) {
+        alert('No messages selected');
+        return;
+      }
+
+      if (confirm(`Delete ${selectedMessages.size} message(s)?`)) {
+        socket.emit('deleteMessages', {
+          messageIds: Array.from(selectedMessages),
+          room: currentRoom
+        });
+        exitDeleteMode();
+      }
+    });
+
+    function closeAllDropdowns() {
+      document.querySelectorAll('.message-dropdown').forEach(dropdown => {
+        dropdown.classList.remove('active');
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.message-menu-btn') && !e.target.closest('.message-dropdown')) {
+        closeAllDropdowns();
+      }
+    });
+
     async function loadChatHistory() {
       try {
         const response = await fetch(`${API_URL}/chat/messages/${currentRoom}`, {
@@ -328,24 +1284,241 @@
         });
 
         const data = await response.json();
-        data.messages.forEach(msg => {
-          appendMessage(msg.senderAnonName, msg.message, msg.timestamp);
-        });
+        displayMessages(data.messages);
         scrollToBottom();
       } catch (error) {
         console.error('Error loading chat history:', error);
       }
     }
 
-    // Socket events
+    function displayMessages(messages) {
+      messagesContainer.innerHTML = '';
+      let currentGroup = null;
+      let lastUserId = null;
+      let lastTimestamp = null;
+
+      messages.forEach((msg) => {
+        const msgUserId = msg.senderUserId;
+        const msgTime = new Date(msg.timestamp).getTime();
+        const timeDiff = lastTimestamp ? msgTime - lastTimestamp : 0;
+
+        if (msgUserId !== lastUserId || timeDiff > 60000) {
+          currentGroup = createMessageGroup(msgUserId, msg.senderAnonName);
+          messagesContainer.appendChild(currentGroup);
+        }
+
+        appendMessageToGroup(currentGroup, msg);
+        lastUserId = msgUserId;
+        lastTimestamp = msgTime;
+      });
+    }
+
+    function createMessageGroup(userId, authorName) {
+      const group = document.createElement('div');
+      group.className = 'message-group ' + (userId === myUserId ? 'my-messages' : 'other-messages');
+      group.dataset.userId = userId;
+      
+      const author = document.createElement('div');
+      author.className = 'message-author';
+      author.textContent = authorName;
+      group.appendChild(author);
+
+      return group;
+    }
+
+    function appendMessageToGroup(group, msg) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message';
+      messageDiv.dataset.messageId = msg._id;
+      messageDiv.dataset.timestamp = msg.timestamp;
+
+      if (msg.senderUserId === myUserId) {
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'message-checkbox';
+        checkbox.dataset.messageId = msg._id;
+        checkbox.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            selectedMessages.add(msg._id);
+          } else {
+            selectedMessages.delete(msg._id);
+          }
+          updateSelectedCount();
+        });
+        messageDiv.appendChild(checkbox);
+      }
+
+      const content = document.createElement('div');
+      content.className = 'message-content';
+
+      if (msg.messageType === 'image') {
+        const img = document.createElement('img');
+        img.src = msg.message;
+        img.className = 'message-image';
+        img.onclick = () => window.open(msg.message);
+        content.appendChild(img);
+      } else if (msg.messageType === 'audio') {
+        const audio = document.createElement('audio');
+        audio.src = msg.message;
+        audio.controls = true;
+        audio.className = 'message-audio';
+        content.appendChild(audio);
+      } else if (msg.messageType === 'file') {
+        const fileDiv = document.createElement('div');
+        fileDiv.className = 'message-file';
+        fileDiv.innerHTML = `
+          <div class="file-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="file-info">
+            <div class="file-name">${escapeHtml(msg.fileName)}</div>
+            <div class="file-size">${formatFileSize(msg.fileSize || 0)}</div>
+          </div>
+        `;
+        fileDiv.onclick = () => downloadFile(msg.message, msg.fileName);
+        content.appendChild(fileDiv);
+      } else {
+        const textNode = document.createTextNode(msg.message);
+        content.appendChild(textNode);
+        
+        if (msg.isEdited) {
+          const editedBadge = document.createElement('span');
+          editedBadge.className = 'edited-badge';
+          editedBadge.textContent = '(edited)';
+          content.appendChild(editedBadge);
+        }
+      }
+
+      messageDiv.appendChild(content);
+
+      if (msg.senderUserId === myUserId && msg.messageType === 'text') {
+        const menuBtn = document.createElement('button');
+        menuBtn.className = 'message-menu-btn';
+        menuBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        `;
+        
+        const dropdown = document.createElement('div');
+        dropdown.className = 'message-dropdown';
+        dropdown.innerHTML = `
+          <div class="dropdown-item" data-action="edit">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            EDIT
+          </div>
+          <div class="dropdown-item delete" data-action="delete">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            DELETE
+          </div>
+        `;
+        
+        menuBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          closeAllDropdowns();
+          dropdown.classList.toggle('active');
+        });
+
+        dropdown.addEventListener('click', (e) => {
+          const action = e.target.closest('.dropdown-item')?.dataset.action;
+          if (action === 'edit') {
+            openEditModal(msg._id, msg.message, msg.timestamp);
+          } else if (action === 'delete') {
+            enterDeleteMode();
+          }
+          dropdown.classList.remove('active');
+        });
+
+        messageDiv.appendChild(menuBtn);
+        messageDiv.appendChild(dropdown);
+      }
+
+      group.appendChild(messageDiv);
+    }
+
+    function downloadFile(dataUrl, fileName) {
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = fileName;
+      a.click();
+    }
+
     socket.on('connect', () => {
       console.log('Connected to server');
       socket.emit('joinRoom', { room: currentRoom });
     });
 
     socket.on('message', (data) => {
-      appendMessage(data.anonName, data.message, data.timestamp);
+      addNewMessage(data);
       scrollToBottom();
+    });
+
+    function addNewMessage(data) {
+      const lastGroup = messagesContainer.lastElementChild;
+      const lastGroupUserId = lastGroup ? lastGroup.dataset.userId : null;
+      const timeDiff = lastGroup ? Date.now() - parseInt(lastGroup.dataset.lastTime || 0) : Infinity;
+
+      if (lastGroupUserId === data.userId && timeDiff < 60000) {
+        appendMessageToGroup(lastGroup, {
+          _id: data.messageId || Date.now(),
+          senderUserId: data.userId,
+          messageType: data.messageType,
+          message: data.message,
+          fileName: data.fileName,
+          fileSize: data.fileSize,
+          timestamp: data.timestamp,
+          isEdited: false
+        });
+        lastGroup.dataset.lastTime = new Date(data.timestamp).getTime();
+      } else {
+        const newGroup = createMessageGroup(data.userId, data.anonName);
+        newGroup.dataset.lastTime = new Date(data.timestamp).getTime();
+        appendMessageToGroup(newGroup, {
+          _id: data.messageId || Date.now(),
+          senderUserId: data.userId,
+          messageType: data.messageType,
+          message: data.message,
+          fileName: data.fileName,
+          fileSize: data.fileSize,
+          timestamp: data.timestamp,
+          isEdited: false
+        });
+        messagesContainer.appendChild(newGroup);
+      }
+    }
+
+    socket.on('messageEdited', (data) => {
+      const messageEl = document.querySelector(`[data-message-id="${data.messageId}"]`);
+      if (messageEl) {
+        const content = messageEl.querySelector('.message-content');
+        content.childNodes[0].textContent = data.newText;
+        
+        let editedBadge = content.querySelector('.edited-badge');
+        if (!editedBadge) {
+          editedBadge = document.createElement('span');
+          editedBadge.className = 'edited-badge';
+          editedBadge.textContent = '(edited)';
+          content.appendChild(editedBadge);
+        }
+      }
+    });
+
+    socket.on('messagesDeleted', (data) => {
+      data.messageIds.forEach(msgId => {
+        const messageEl = document.querySelector(`[data-message-id="${msgId}"]`);
+        if (messageEl) {
+          const group = messageEl.closest('.message-group');
+          messageEl.remove();
+          
+          if (group && group.children.length <= 1) {
+            group.remove();
+          }
+        }
+      });
+    });
+
+    socket.on('notification', (data) => {
+      showNotification(data.message);
     });
 
     socket.on('userJoined', (data) => {
@@ -379,24 +1552,46 @@
       alert(data.message);
     });
 
-    // Send message
-    function sendMessage() {
-      const message = messageInput.value.trim();
-      if (message) {
-        socket.emit('message', { room: currentRoom, text: message });
-        messageInput.value = '';
-        socket.emit('stopTyping', { room: currentRoom });
+    function sendMessage(data = null, type = 'text', fileName = null, fileSize = null) {
+      let messageData;
+
+      if (data) {
+        messageData = data;
+      } else if (selectedFile) {
+        messageData = selectedFile.data;
+        type = selectedFileType;
+        fileName = selectedFile.name;
+        fileSize = selectedFile.size;
+      } else {
+        const text = messageInput.value.trim();
+        if (!text) return;
+        messageData = text;
       }
+
+      socket.emit('message', { 
+        room: currentRoom, 
+        text: messageData,
+        type: type,
+        fileName: fileName,
+        fileSize: fileSize
+      });
+
+      messageInput.value = '';
+      selectedFile = null;
+      document.getElementById('file-preview').classList.remove('active');
+      document.getElementById('file-input').value = '';
+      document.getElementById('image-input').value = '';
+      socket.emit('stopTyping', { room: currentRoom });
     }
 
-    sendBtn.addEventListener('click', sendMessage);
+    sendBtn.addEventListener('click', () => sendMessage());
     messageInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
         sendMessage();
       }
     });
 
-    // Typing indicator
     let typingTimer;
     messageInput.addEventListener('input', () => {
       socket.emit('typing', { room: currentRoom });
@@ -404,28 +1599,10 @@
       typingTimer = setTimeout(() => {
         socket.emit('stopTyping', { room: currentRoom });
       }, 1000);
+
+      messageInput.style.height = 'auto';
+      messageInput.style.height = messageInput.scrollHeight + 'px';
     });
-
-    // Append message
-    function appendMessage(author, message, timestamp) {
-      const messageDiv = document.createElement('div');
-      messageDiv.className = 'message';
-
-      const time = new Date(timestamp).toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-
-      messageDiv.innerHTML = `
-        <div class="message-header">
-          <span class="message-author">${escapeHtml(author)}</span>
-          <span class="message-time">${time}</span>
-        </div>
-        <div class="message-content">${escapeHtml(message)}</div>
-      `;
-
-      messagesContainer.appendChild(messageDiv);
-    }
 
     function appendSystemMessage(message) {
       const messageDiv = document.createElement('div');
@@ -440,6 +1617,14 @@
       `).join('');
     }
 
+    function showNotification(message) {
+      notificationToast.textContent = message;
+      notificationToast.classList.add('show');
+      setTimeout(() => {
+        notificationToast.classList.remove('show');
+      }, 3000);
+    }
+
     function scrollToBottom() {
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
@@ -450,10 +1635,23 @@
       return div.innerHTML;
     }
 
-    // Initialize
-    loadChatHistory();
+    async function fetchUserId() {
+      try {
+        const response = await fetch(`${API_URL}/auth/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        myUserId = data.userId;
+        localStorage.setItem('userId', data.userId);
+      } catch (error) {
+        console.error('Error fetching user ID:', error);
+      }
+    }
 
-    // Cleanup on page unload
+    fetchUserId().then(() => {
+      loadChatHistory();
+    });
+
     window.addEventListener('beforeunload', () => {
       socket.emit('leaveRoom', { room: currentRoom });
     });
