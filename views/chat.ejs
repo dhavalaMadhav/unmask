@@ -274,6 +274,21 @@
     ::-webkit-scrollbar-track { background: var(--bg-alt);}
     ::-webkit-scrollbar-thumb { background: var(--border);}
     ::-webkit-scrollbar-thumb:hover { background: var(--text-muted);}
+    .avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #ccc;
+  font-weight: 700;
+  font-size: 18px;
+  color: #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
   </style>
 </head>
 <!-- ... the rest of your template remains unchanged ... -->
@@ -563,6 +578,67 @@
 
       reader.readAsDataURL(file);
     }
+
+    function renderMessageGroup(user) {
+  const groupDiv = document.createElement('div');
+  groupDiv.classList.add('message-group');
+
+  const authorContainer = document.createElement('div');
+  authorContainer.classList.add('message-author-container');
+
+  const avatar = document.createElement('span');
+  avatar.classList.add('avatar');
+
+  if (user.profileImage) {
+    const img = document.createElement('img');
+    img.src = user.profileImage;
+    img.alt = user.anonName;
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'cover';
+    avatar.appendChild(img);
+  } else {
+    avatar.textContent = user.anonName.charAt(0).toUpperCase();
+  }
+
+  const authorName = document.createElement('span');
+  authorName.classList.add('message-author');
+  authorName.textContent = user.anonName;
+
+  authorContainer.appendChild(avatar);
+  authorContainer.appendChild(authorName);
+
+  groupDiv.appendChild(authorContainer);
+
+  return groupDiv;
+}
+
+// Assuming you have onlineUsers which is an array of objects like:
+// [ { anonName: 'SilentWolf23', profileImage: 'data:image/png;base64,...' }, ... ]
+
+function renderOnlineUsers(users) {
+  const container = document.getElementById('online-users');
+  container.innerHTML = users.map(user => {
+    if (user.profileImage) {
+      return `
+        <li class="online-user" style="display:flex; align-items:center; gap:0.7em;">
+          <img src="${user.profileImage}" alt="${user.anonName}" style="width:32px; height:32px; border-radius:50%; object-fit:cover;" />
+          <span>${user.anonName}</span>
+        </li>
+      `;
+    } else {
+      const initial = user.anonName.charAt(0).toUpperCase();
+      return `
+        <li class="online-user" style="display:flex; align-items:center; gap:0.7em;">
+          <div style="width:32px; height:32px; border-radius:50%; background:#ccc; color:#444; font-weight:700; font-size:18px; display:flex; align-items:center; justify-content:center;">
+            ${initial}
+          </div>
+          <span>${user.anonName}</span>
+        </li>
+      `;
+    }
+  }).join('');
+}
 
     function compressImage(base64, fileName, callback) {
       const img = new Image();
@@ -1023,6 +1099,10 @@
     socket.on('onlineUsers', (users) => {
       updateOnlineUsers(users);
     });
+
+    socket.on('onlineUsers', (users) => {
+  renderOnlineUsers(users);
+});
 
     let typingTimeout;
     socket.on('typing', (data) => {

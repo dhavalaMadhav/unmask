@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 
-// User Schema (unchanged)
+// User Schema with Email Authentication + Profile Image
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -21,11 +21,19 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  profileImage: {
+    type: String,
+    default: null
+  },
   createdAt: {
     type: Date,
     default: Date.now
   }
 });
+
+// Add indexes for performance
+userSchema.index({ email: 1 });
+userSchema.index({ anonName: 1 });
 
 // Updated Message Schema with edit tracking
 const messageSchema = new mongoose.Schema({
@@ -73,6 +81,7 @@ const messageSchema = new mongoose.Schema({
 });
 
 messageSchema.index({ room: 1, timestamp: -1 });
+messageSchema.index({ senderUserId: 1 });
 
 const User = mongoose.model('User', userSchema);
 const Message = mongoose.model('Message', messageSchema);
