@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -23,25 +23,152 @@
       line-height: 1.6; overflow: hidden;
     }
     .chat-container { display: flex; flex-direction: column; height: 100vh; padding-top: 70px; }
-    .header {
-      position: fixed; top: 0; left: 0; right: 0;
-      background: rgba(255, 255, 255, 0.95); z-index: 1000;
-      border-bottom: 1px solid rgba(0,0,0,0.1); backdrop-filter: blur(10px);
-      padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center;
-    }
-    .header h1 {
-      font-size: 1.5rem; text-transform: uppercase;
-      font-weight: 700; letter-spacing: -0.01em;
-    }
-    .btn-back {
-      padding: 0.75rem 1.5rem; background: transparent; border: 2px solid var(--primary);
-      color: var(--primary); font-weight: 600; text-transform: uppercase; font-size: 0.75rem;
-      letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s; text-decoration: none;
-      display: inline-flex; align-items: center; gap: 0.5rem;
-    }
-    .btn-back:hover { background: var(--primary); color: #fff; }
-    .btn-back svg { width: 16px; height: 16px; }
-    .chat-body { display: flex; flex: 1; overflow: hidden; }
+/* Update the header styles */
+.header {
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  right: 0;
+  background: rgba(255, 255, 255, 0.95); 
+  z-index: 1000;
+  border-bottom: 1px solid rgba(0,0,0,0.1); 
+  backdrop-filter: blur(10px);
+  padding: 1.5rem 2rem; 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
+  flex-direction: row; /* Ensure horizontal layout */
+}
+
+.header h1 {
+  font-size: 1.5rem; 
+  text-transform: uppercase;
+  font-weight: 700; 
+  letter-spacing: -0.01em;
+  margin: 0; /* Remove any default margins */
+}
+
+.header-actions {
+  display: flex; 
+  gap: 1rem; 
+  align-items: center;
+  margin-left: auto; /* This pushes the buttons to the right */
+}
+
+/* Keep the rest of your existing header styles */
+.btn-back, .btn-settings {
+  padding: 0.75rem 1.5rem; 
+  background: transparent; 
+  border: 2px solid var(--primary);
+  color: var(--primary); 
+  font-weight: 600; 
+  text-transform: uppercase; 
+  font-size: 0.75rem;
+  letter-spacing: 0.05em; 
+  cursor: pointer; 
+  transition: all 0.2s; 
+  text-decoration: none;
+  display: inline-flex; 
+  align-items: center; 
+  gap: 0.5rem;
+}
+
+.btn-back:hover, .btn-settings:hover { 
+  background: var(--primary); 
+  color: #fff; 
+}
+
+.btn-back svg, .btn-settings svg { 
+  width: 16px; 
+  height: 16px; 
+}
+
+/* Update mobile styles if needed */
+@media (max-width: 968px) {
+  .media-grid {
+    max-height: 250px; /* Slightly smaller on mobile */
+  }
+
+  .files-list, .audio-list {
+    max-height: 250px; /* Slightly smaller on mobile */
+  }
+
+  .settings-sections {
+    max-height: 60vh; /* Limit height for mobile */
+  }
+
+    .settings-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 1.5rem;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    overflow-x: auto; /* Enable horizontal scrolling */
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+  }
+
+  .settings-tabs::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome/Safari */
+  }
+
+  .settings-tab {
+    padding: 1rem 1.2rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.8rem; /* Slightly smaller font on mobile */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    color: var(--text-muted);
+    position: relative;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0; /* Prevent tabs from shrinking */
+  }
+
+  .settings-modal {
+    max-width: 95%; /* Slightly wider on mobile */
+    width: 95%;
+    max-height: 85vh; /* Slightly taller on mobile */
+  }
+
+  .settings-sections {
+    padding-right: 0; /* Remove right padding on mobile */
+  }
+  
+  .header { 
+    padding: 1.5rem; 
+    flex-direction: row; /* Ensure horizontal layout on mobile too */
+    justify-content: space-between;
+  }
+      .header h1 {
+        font-size: 1.5rem;
+        width: 100%;
+      }  
+      
+  .header-actions {
+    gap: 0.5rem; /* Reduce gap on mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .header h1 { 
+    font-size: 1rem;
+  }
+  
+  .btn-back, .btn-settings { 
+    padding: 0.5rem 1rem; 
+    font-size: 0.7rem;
+  }
+}    .chat-body { display: flex; flex: 1; overflow: hidden; }
     .messages-section { flex: 1; display: flex; flex-direction: column; border-right: 2px solid var(--border); min-height: 0; }
     .messages-container { flex: 1; overflow-y: auto; padding: 2rem; display: flex; flex-direction: column; gap: 0.5rem; min-height: 0; }
     .message-group { display: flex; flex-direction: column; margin-bottom: 1rem; }
@@ -68,18 +195,36 @@
 
 /* Add pointer cursor only to message content */
 .message-content {
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  word-wrap: break-word;
-  word-break: break-word;
+  padding: 1rem 1.5rem; 
+  border-radius: 12px; 
+  word-wrap: break-word; 
+  word-break: break-word; 
   overflow-wrap: break-word;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  position: relative;
-  flex: 1;
-  max-width: 80vw;
+  font-size: 0.95rem; 
+  line-height: 1.6; 
+  position: relative; 
+  flex: 1; 
+  max-width: 80vw; 
   min-width: 0;
-  cursor: pointer; /* Add this line */
+  cursor: pointer;
+  /* Add subtle shadow */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.405);
+}
+
+.my-messages .message-content { 
+  background: var(--my-message); 
+  color: #fff; 
+  border-bottom-right-radius: 4px; 
+  /* Slightly darker shadow for my messages */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.405);
+}
+
+.other-messages .message-content { 
+  background: var(--other-message); 
+  color: var(--text); 
+  border-bottom-left-radius: 4px; 
+  /* Lighter shadow for other messages */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.405);
 }
 
 /* Disable hover effects and dropdown in delete mode */
@@ -254,11 +399,14 @@
     }
     .btn-remove svg { width: 14px; height: 14px; }
     .notification-toast {
+      visibility: hidden;
       position: fixed; top: 90px; right: 2rem; background: var(--primary); color: #fff; padding: 1rem 1.5rem;
       border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transform: translateX(400px); transition: transform 0.3s;
       z-index: 1001; max-width: 300px;
     }
-    .notification-toast.show { transform: translateX(0); }
+    .notification-toast.show { transform: translateX(0); 
+          visibility: visible;
+                }
     .sidebar {
       width: 280px; background: var(--bg-alt); padding: 2rem; overflow-y: auto; flex-shrink: 0;
     }
@@ -329,7 +477,25 @@
     }
     @media (max-width: 480px) {
       .header h1 { font-size: 1rem;}
-      .btn-back { padding: 0.5rem 1rem; font-size: 0.7rem;}
+      .btn-back, .btn-settings { padding: 0.5rem 1rem; font-size: 0.7rem;
+       }
+         .btn-back .btn-text, 
+  .btn-settings .btn-text {
+    display: none; /* Hide text on mobile */
+  }
+ .settings-tab {
+    padding: 0.9rem 1rem;
+    font-size: 0.75rem; /* Even smaller font on very small screens */
+  }
+
+  .settings-modal {
+    padding: 1.5rem; /* Less padding on very small screens */
+  }
+
+  .settings-modal h3 {
+    font-size: 1.3rem; /* Slightly smaller title */
+    margin-bottom: 1rem;
+  }
       .message-input { font-size: 0.85rem;}
       .btn-send { width: 40px; height: 40px;}
       .mobile-attach-btn { width: 40px; height: 40px;}
@@ -443,10 +609,525 @@
   }
 }
 
+/* Settings Modal Styles */
+/* Add these styles to fix the settings modal */
+.settings-modal {
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh; /* Limit maximum height */
+  overflow: hidden; /* Prevent overflow */
+  display: flex;
+  flex-direction: column;
+}
 
+.settings-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-sections {
+  flex: 1;
+  overflow-y: auto; /* Scroll if content is too long */
+  padding-right: 0.5rem;
+}
+
+/* Tab navigation styles */
+.settings-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 1.5rem;
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.settings-tab {
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: var(--text-muted);
+  position: relative;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.settings-tab:hover {
+  color: var(--text);
+  background: var(--bg-alt);
+}
+
+.settings-tab.active {
+  color: var(--primary);
+}
+
+.settings-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary);
+  animation: underlineSlide 0.3s ease-out;
+}
+
+@keyframes underlineSlide {
+  from {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  to {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+/* Animation for content */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.media-content-section {
+  animation: fadeIn 0.3s ease-in;
+}
+
+/* Update media grid heights to fit within modal */
+.media-grid {
+  max-height: 300px; /* Reduced from 400px */
+}
+
+.files-list, .audio-list {
+  max-height: 300px; /* Reduced from 400px */
+}
+.settings-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-section h4 {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+}
+
+.settings-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.settings-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: transparent;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.settings-option:hover {
+  border-color: var(--primary);
+}
+
+.settings-option.active {
+  border-color: var(--accent);
+  background: rgba(0, 102, 255, 0.05);
+}
+
+.settings-option-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-alt);
+  border-radius: 8px;
+}
+
+.settings-option-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--text);
+}
+
+.settings-option-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.color-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.color-option {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.color-option:hover {
+  transform: scale(1.1);
+}
+
+.color-option.active {
+  border-color: var(--primary);
+  transform: scale(1.1);
+}
+
+/* Reply Preview Styles */
+.reply-preview {
+  display: none;
+  padding: 0.75rem 1rem;
+  background: var(--bg-alt);
+  border-bottom: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  position: relative;
+}
+
+.reply-preview.active {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.reply-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.reply-author {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.reply-content {
+  font-size: 0.85rem;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.reply-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reply-close svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--text-muted);
+}
+
+.reply-close:hover svg {
+  stroke: var(--text);
+}
+
+/* Other User Message Dropdown */
+.other-messages .message-menu-btn {
+  display: none;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  opacity: 0;
+  transform: scale(0.85);
+  z-index: 10;
+}
+
+.other-messages .message:hover .message-menu-btn {
+  display: flex;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.other-messages .message-dropdown {
+  position: absolute;
+  top: 100%;
+  right: -5px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 100;
+  display: none;
+  min-width: 150px;
+  margin-top: 0.5rem;
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.other-messages .message-dropdown.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.other-messages .message-dropdown .dropdown-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s;
+}
+
+.other-messages .message-dropdown .dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.other-messages .message-dropdown .dropdown-item:hover {
+  background: var(--bg-alt);
+}
+
+.other-messages .message-dropdown .dropdown-item svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Arrow for other messages */
+.other-messages .message-content::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -8px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 8px 8px;
+  border-color: transparent transparent var(--other-message) transparent;
+}
+
+/* Reply Message Styles */
+.reply-message {
+  border-left: 3px solid var(--accent);
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 0 8px 8px 0;
+}
+
+.my-messages .reply-message {
+  background: rgba(255, 255, 255, 0.2);
+  border-left-color: rgba(255, 255, 255, 0.7);
+}
+
+.reply-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.reply-author-name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+}
+
+.my-messages .reply-author-name {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.reply-text {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.reply-indicator {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.my-messages .reply-indicator {
+  color: rgba(255, 255, 255, 0.7);
+}
+/* Add these styles to your existing CSS */
+.media-content-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.media-content-section h4 {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+}
+
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.media-item {
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s;
+  aspect-ratio: 1;
+}
+
+.media-item:hover {
+  transform: scale(1.05);
+}
+
+.media-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.files-list, .audio-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.file-item, .audio-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-alt);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.file-item:hover, .audio-item:hover {
+  background: var(--border);
+}
+
+.file-icon, .audio-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.file-icon svg, .audio-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: #fff;
+}
+
+.file-info, .audio-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-name, .audio-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-meta, .audio-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.no-media {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.back-button {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 2px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+  transition: all 0.2s;
+}
+
+.back-button:hover {
+  border-color: var(--primary);
+}
   </style>
 </head>
-<!-- ... the rest of your template remains unchanged ... -->
 
 <body>
   <div class="notification-toast" id="notification-toast"></div>
@@ -462,19 +1143,121 @@
     </div>
   </div>
 
-  <div class="chat-container" id="chat-container">
-    <div class="header">
-      <h1 id="room-name">LOADING...</h1>
-      <a href="/dashboard" class="btn-back">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        BACK
-      </a>
+<!-- Replace the existing settings modal with this updated version -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal settings-modal">
+    <h3>CHAT SETTINGS</h3>
+    
+    <div class="settings-content">
+      <!-- Tab Navigation -->
+      <div class="settings-tabs">
+        <button class="settings-tab active" data-tab="appearance">APPEARANCE</button>
+        <button class="settings-tab" data-tab="images">IMAGES</button>
+        <button class="settings-tab" data-tab="files">FILES</button>
+        <button class="settings-tab" data-tab="audio">AUDIO</button>
+      </div>
+      
+      <div class="settings-sections">
+        <!-- Appearance Section -->
+        <div class="media-content-section" id="appearance-section">
+          <div class="settings-section">
+            <h4>BACKGROUND COLOR</h4>
+            <div class="color-options">
+              <div class="color-option active" style="background-color: #ffffff;" data-color="#ffffff"></div>
+              <div class="color-option" style="background-color: #f8f8f8;" data-color="#f8f8f8"></div>
+              <div class="color-option" style="background-color: #f0f0f0;" data-color="#f0f0f0"></div>
+              <div class="color-option" style="background-color: #e8f4f8;" data-color="#e8f4f8"></div>
+              <div class="color-option" style="background-color: #f8f0e8;" data-color="#f8f0e8"></div>
+              <div class="color-option" style="background-color: #f0f8f0;" data-color="#f0f8f0"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Images Section -->
+        <div class="media-content-section" id="images-section" style="display: none;">
+          <h4>SHARED IMAGES</h4>
+          <div class="media-grid" id="images-grid">
+            <!-- Images will be loaded here -->
+          </div>
+          <div class="no-media" id="no-images" style="display: none;">
+            <p>No images shared in this chat yet.</p>
+          </div>
+        </div>
+
+        <!-- Files Section -->
+        <div class="media-content-section" id="files-section" style="display: none;">
+          <h4>SHARED FILES</h4>
+          <div class="files-list" id="files-list">
+            <!-- Files will be loaded here -->
+          </div>
+          <div class="no-media" id="no-files" style="display: none;">
+            <p>No files shared in this chat yet.</p>
+          </div>
+        </div>
+
+        <!-- Audio Section -->
+        <div class="media-content-section" id="audio-section" style="display: none;">
+          <h4>VOICE MESSAGES</h4>
+          <div class="audio-list" id="audio-list">
+            <!-- Audio files will be loaded here -->
+          </div>
+          <div class="no-media" id="no-audio" style="display: none;">
+            <p>No voice messages in this chat yet.</p>
+          </div>
+        </div>
+      </div>
     </div>
+    
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-secondary" id="close-settings">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+  <div class="chat-container" id="chat-container">
+<div class="header">
+  <!-- Title on the left -->
+  <h1 id="room-name">LOADING...</h1>
+  
+  <!-- Buttons on the right -->
+  <div class="header-actions">
+    <a class="btn-settings" id="settings-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      <div class="btn-text">      
+Settings
+</div>   
+ </a>
+    <a href="/dashboard" class="btn-back">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      <div class="btn-text">      
+        BACK
+</div>
+    </a>
+  </div>
+</div>
 
     <div class="chat-body">
       <div class="messages-section">
         <div class="messages-container" id="messages"></div>
         <div class="typing-indicator" id="typing-indicator"></div>
+        
+        <div class="reply-preview" id="reply-preview">
+          <div class="reply-info">
+            <div class="reply-author" id="reply-author"></div>
+            <div class="reply-content" id="reply-content"></div>
+          </div>
+          <button class="reply-close" id="reply-close">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
         
         <div class="file-preview" id="file-preview">
           <img class="preview-image" id="preview-image" style="display:none;">
@@ -663,12 +1446,282 @@ document.addEventListener('keydown', function(e) {
   const selectedCountEl = document.getElementById('selected-count');
   const editModal = document.getElementById('edit-modal');
   const editTextarea = document.getElementById('edit-textarea');
+  const settingsModal = document.getElementById('settings-modal');
+  const settingsBtn = document.getElementById('settings-btn');
+  const closeSettingsBtn = document.getElementById('close-settings');
+  const replyPreview = document.getElementById('reply-preview');
+  const replyAuthor = document.getElementById('reply-author');
+  const replyContent = document.getElementById('reply-content');
+  const replyClose = document.getElementById('reply-close');
 
   let isDeleteMode = false;
   let selectedMessages = new Set();
   let currentEditMessageId = null;
   let selectedFile = null;
   let selectedFileType = 'file';
+  let replyingTo = null;
+  let replyMessageData = null;
+
+  // Settings functionality
+  settingsBtn.addEventListener('click', () => {
+    settingsModal.classList.add('active');
+  });
+
+  closeSettingsBtn.addEventListener('click', () => {
+    settingsModal.classList.remove('active');
+  });
+
+  settingsModal.addEventListener('click', (e) => {
+    if (e.target === settingsModal) {
+      settingsModal.classList.remove('active');
+    }
+  });
+
+  // Background color selection
+  document.querySelectorAll('.color-option').forEach(option => {
+    option.addEventListener('click', () => {
+      document.querySelectorAll('.color-option').forEach(opt => {
+        opt.classList.remove('active');
+      });
+      option.classList.add('active');
+      
+      const color = option.getAttribute('data-color');
+      document.body.style.backgroundColor = color;
+      localStorage.setItem('chatBackgroundColor', color);
+    });
+  });
+
+  // Load saved background color
+  const savedColor = localStorage.getItem('chatBackgroundColor');
+  if (savedColor) {
+    document.body.style.backgroundColor = savedColor;
+    document.querySelectorAll('.color-option').forEach(option => {
+      if (option.getAttribute('data-color') === savedColor) {
+        option.classList.add('active');
+      } else {
+        option.classList.remove('active');
+      }
+    });
+  }
+
+  // Settings options
+// Tab functionality for settings
+let currentTab = 'appearance';
+
+document.querySelectorAll('.settings-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const tabName = tab.getAttribute('data-tab');
+    
+    // Update active tab
+    document.querySelectorAll('.settings-tab').forEach(t => {
+      t.classList.remove('active');
+    });
+    tab.classList.add('active');
+    
+    // Hide all sections
+    document.querySelectorAll('.media-content-section').forEach(section => {
+      section.style.display = 'none';
+    });
+    
+    // Show selected section
+    document.getElementById(`${tabName}-section`).style.display = 'block';
+    currentTab = tabName;
+    
+    // Load content if needed
+    if (tabName === 'images') {
+      loadImages();
+    } else if (tabName === 'files') {
+      loadFiles();
+    } else if (tabName === 'audio') {
+      loadAudio();
+    }
+  });
+});
+
+// Update the load functions to handle the tab interface
+async function loadImages() {
+  try {
+    const response = await fetch(`${API_URL}/chat/messages/${currentRoom}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    const data = await response.json();
+    const images = data.messages.filter(msg => msg.messageType === 'image');
+    
+    const imagesGrid = document.getElementById('images-grid');
+    const noImages = document.getElementById('no-images');
+    
+    imagesGrid.innerHTML = '';
+    
+    if (images.length === 0) {
+      noImages.style.display = 'block';
+      imagesGrid.style.display = 'none';
+    } else {
+      noImages.style.display = 'none';
+      imagesGrid.style.display = 'grid';
+      
+      images.forEach(image => {
+        const mediaItem = document.createElement('div');
+        mediaItem.className = 'media-item';
+        mediaItem.innerHTML = `
+          <img src="${image.message}" alt="Shared image" onclick="openImageModal('${image.message}', 'Image from ${escapeHtml(image.senderAnonName)}')">
+        `;
+        imagesGrid.appendChild(mediaItem);
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error loading images:', error);
+    document.getElementById('no-images').style.display = 'block';
+    document.getElementById('images-grid').style.display = 'none';
+  }
+}
+
+async function loadFiles() {
+  try {
+    const response = await fetch(`${API_URL}/chat/messages/${currentRoom}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    const data = await response.json();
+    const files = data.messages.filter(msg => msg.messageType === 'file');
+    
+    const filesList = document.getElementById('files-list');
+    const noFiles = document.getElementById('no-files');
+    
+    filesList.innerHTML = '';
+    
+    if (files.length === 0) {
+      noFiles.style.display = 'block';
+      filesList.style.display = 'none';
+    } else {
+      noFiles.style.display = 'none';
+      filesList.style.display = 'block';
+      
+      files.forEach(file => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.onclick = () => downloadFile(file.message, file.fileName);
+        fileItem.innerHTML = `
+          <div class="file-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <div class="file-info">
+            <div class="file-name">${escapeHtml(file.fileName)}</div>
+            <div class="file-meta">
+              <span>From: ${escapeHtml(file.senderAnonName)}</span>
+              <span>${formatFileSize(file.fileSize || 0)}</span>
+            </div>
+          </div>
+        `;
+        filesList.appendChild(fileItem);
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error loading files:', error);
+    document.getElementById('no-files').style.display = 'block';
+    document.getElementById('files-list').style.display = 'none';
+  }
+}
+
+async function loadAudio() {
+  try {
+    const response = await fetch(`${API_URL}/chat/messages/${currentRoom}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    const data = await response.json();
+    const audioMessages = data.messages.filter(msg => msg.messageType === 'audio');
+    
+    const audioList = document.getElementById('audio-list');
+    const noAudio = document.getElementById('no-audio');
+    
+    audioList.innerHTML = '';
+    
+    if (audioMessages.length === 0) {
+      noAudio.style.display = 'block';
+      audioList.style.display = 'none';
+    } else {
+      noAudio.style.display = 'none';
+      audioList.style.display = 'block';
+      
+      audioMessages.forEach(audio => {
+        const audioItem = document.createElement('div');
+        audioItem.className = 'audio-item';
+        audioItem.innerHTML = `
+          <div class="audio-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" x2="12" y1="19" y2="22"/>
+            </svg>
+          </div>
+          <div class="audio-info">
+            <div class="audio-name">Voice Message</div>
+            <div class="audio-meta">
+              <span>From: ${escapeHtml(audio.senderAnonName)}</span>
+              <span>${new Date(audio.timestamp).toLocaleDateString()}</span>
+            </div>
+          </div>
+          <audio controls style="width: 150px; height: 40px;">
+            <source src="${audio.message}" type="audio/webm">
+            Your browser does not support the audio element.
+          </audio>
+        `;
+        audioList.appendChild(audioItem);
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error loading audio:', error);
+    document.getElementById('no-audio').style.display = 'block';
+    document.getElementById('audio-list').style.display = 'none';
+  }
+}
+
+// Reset to appearance tab when closing settings
+document.getElementById('close-settings').addEventListener('click', () => {
+  settingsModal.classList.remove('active');
+  // Reset to appearance tab
+  document.querySelectorAll('.settings-tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  document.querySelector('[data-tab="appearance"]').classList.add('active');
+  
+  document.querySelectorAll('.media-content-section').forEach(section => {
+    section.style.display = 'none';
+  });
+  document.getElementById('appearance-section').style.display = 'block';
+});
+// Also hide media sections when clicking outside the modal
+settingsModal.addEventListener('click', (e) => {
+  if (e.target === settingsModal) {
+    settingsModal.classList.remove('active');
+    document.querySelectorAll('.media-content-section').forEach(section => {
+      section.style.display = 'none';
+    });
+  }
+});
+
+  // Reply functionality
+  replyClose.addEventListener('click', () => {
+    replyPreview.classList.remove('active');
+    replyingTo = null;
+    replyMessageData = null;
+  });
+
+  function setReply(messageId, author, content, messageData) {
+    replyingTo = messageId;
+    replyMessageData = messageData;
+    replyAuthor.textContent = author;
+    replyContent.textContent = content;
+    replyPreview.classList.add('active');
+    messageInput.focus();
+  }
 
   const mobileAttachBtn = document.getElementById('mobile-attach-btn');
   const mobileMediaMenu = document.getElementById('mobile-media-menu');
@@ -1047,8 +2100,6 @@ function createMessageGroup(userId, authorName, profileImage) {
   return group;
 }
 
-
-
   function appendMessageToGroup(group, msg) {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message';
@@ -1074,11 +2125,38 @@ function createMessageGroup(userId, authorName, profileImage) {
     const content = document.createElement('div');
     content.className = 'message-content';
 
+    // Add reply preview if this message is a reply
+    if (msg.replyTo) {
+      const replyIndicator = document.createElement('div');
+      replyIndicator.className = 'reply-indicator';
+      replyIndicator.textContent = 'Replying to:';
+      content.appendChild(replyIndicator);
+
+      const replyMessage = document.createElement('div');
+      replyMessage.className = 'reply-message';
+      
+      const replyMeta = document.createElement('div');
+      replyMeta.className = 'reply-meta';
+      
+      const replyAuthorName = document.createElement('div');
+      replyAuthorName.className = 'reply-author-name';
+      replyAuthorName.textContent = msg.replyTo.senderAnonName || 'Unknown';
+      
+      const replyText = document.createElement('div');
+      replyText.className = 'reply-text';
+      replyText.textContent = msg.replyTo.message;
+      
+      replyMeta.appendChild(replyAuthorName);
+      replyMessage.appendChild(replyMeta);
+      replyMessage.appendChild(replyText);
+      content.appendChild(replyMessage);
+    }
+
     if (msg.messageType === 'image') {
       const img = document.createElement('img');
       img.src = msg.message;
       img.className = 'message-image';
-img.onclick = () => openImageModal(msg.message, 'Image from ' + (msg.senderAnonName || 'chat'));
+      img.onclick = () => openImageModal(msg.message, 'Image from ' + (msg.senderAnonName || 'chat'));
       content.appendChild(img);
     } else if (msg.messageType === 'audio') {
       const audio = document.createElement('audio');
@@ -1114,17 +2192,20 @@ img.onclick = () => openImageModal(msg.message, 'Image from ' + (msg.senderAnonN
 
     messageDiv.appendChild(content);
 
+    // Add menu button for all messages (both my and other messages)
+    const menuBtn = document.createElement('button');
+    menuBtn.className = 'message-menu-btn';
+    menuBtn.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    `;
+    
+    const dropdown = document.createElement('div');
+    dropdown.className = 'message-dropdown';
+    
     if (msg.senderUserId === myUserId && msg.messageType === 'text') {
-      const menuBtn = document.createElement('button');
-      menuBtn.className = 'message-menu-btn';
-      menuBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
-      `;
-      
-      const dropdown = document.createElement('div');
-      dropdown.className = 'message-dropdown';
+      // My messages - edit and delete options
       dropdown.innerHTML = `
         <div class="dropdown-item" data-action="edit">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
@@ -1135,26 +2216,49 @@ img.onclick = () => openImageModal(msg.message, 'Image from ' + (msg.senderAnonN
           DELETE
         </div>
       `;
-      
-      menuBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        closeAllDropdowns();
-        dropdown.classList.toggle('active');
-      });
-
-      dropdown.addEventListener('click', (e) => {
-        const action = e.target.closest('.dropdown-item')?.dataset.action;
-        if (action === 'edit') {
-          openEditModal(msg._id, msg.message, msg.timestamp);
-        } else if (action === 'delete') {
-          enterDeleteMode();
-        }
-        dropdown.classList.remove('active');
-      });
-
-      messageDiv.appendChild(menuBtn);
-      messageDiv.appendChild(dropdown);
+    } else {
+      // Other messages - reply and copy options
+      dropdown.innerHTML = `
+        <div class="dropdown-item" data-action="reply">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/></svg>
+          REPLY
+        </div>
+        <div class="dropdown-item" data-action="copy">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+          COPY
+        </div>
+      `;
     }
+    
+    menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeAllDropdowns();
+      dropdown.classList.toggle('active');
+    });
+
+    dropdown.addEventListener('click', (e) => {
+      const action = e.target.closest('.dropdown-item')?.dataset.action;
+      if (action === 'edit') {
+        openEditModal(msg._id, msg.message, msg.timestamp);
+      } else if (action === 'delete') {
+        enterDeleteMode();
+      } else if (action === 'reply') {
+        setReply(msg._id, msg.senderAnonName, msg.message, {
+          messageId: msg._id,
+          senderAnonName: msg.senderAnonName,
+          message: msg.message,
+          timestamp: msg.timestamp
+        });
+      } else if (action === 'copy') {
+        navigator.clipboard.writeText(msg.message)
+          .then(() => showNotification('Message copied to clipboard'))
+          .catch(err => console.error('Failed to copy text: ', err));
+      }
+      dropdown.classList.remove('active');
+    });
+
+    messageDiv.appendChild(menuBtn);
+    messageDiv.appendChild(dropdown);
 
     group.appendChild(messageDiv);
   }
@@ -1190,7 +2294,8 @@ img.onclick = () => openImageModal(msg.message, 'Image from ' + (msg.senderAnonN
         fileName: data.fileName,
         fileSize: data.fileSize,
         timestamp: data.timestamp,
-        isEdited: false
+        isEdited: false,
+        replyTo: data.replyTo
       });
       lastGroup.dataset.lastTime = new Date(data.timestamp).getTime();
     } else {
@@ -1204,7 +2309,8 @@ img.onclick = () => openImageModal(msg.message, 'Image from ' + (msg.senderAnonN
         fileName: data.fileName,
         fileSize: data.fileSize,
         timestamp: data.timestamp,
-        isEdited: false
+        isEdited: false,
+        replyTo: data.replyTo
       });
       messagesContainer.appendChild(newGroup);
     }
@@ -1314,19 +2420,32 @@ img.onclick = () => openImageModal(msg.message, 'Image from ' + (msg.senderAnonN
       messageData = text;
     }
 
-    socket.emit('message', { 
+    const messagePayload = { 
       room: currentRoom, 
       text: messageData,
       type: type,
       fileName: fileName,
       fileSize: fileSize
-    });
+    };
+
+    // Add reply data if replying to a message
+    if (replyingTo && replyMessageData) {
+      messagePayload.replyTo = replyMessageData;
+    }
+
+    socket.emit('message', messagePayload);
 
     messageInput.value = '';
     selectedFile = null;
     document.getElementById('file-preview').classList.remove('active');
     document.getElementById('file-input').value = '';
     document.getElementById('image-input').value = '';
+    
+    // Clear reply preview
+    replyPreview.classList.remove('active');
+    replyingTo = null;
+    replyMessageData = null;
+    
     socket.emit('stopTyping', { room: currentRoom });
   }
 
