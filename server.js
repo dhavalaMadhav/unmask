@@ -64,7 +64,6 @@ app.get('/login', (req, res) => res.render('login'));
 app.get('/dashboard', (req, res) => res.render('dashboard'));
 app.get('/chat', (req, res) => res.render('chat'));
 app.get('/settings', (req, res) => res.render('settings'));
-
 // ------------------------
 // AUTH API
 // ------------------------
@@ -280,6 +279,7 @@ io.to(room).emit('onlineUsers', onlineUsers);
 });
 
   const messageTimestamps = [];
+
 
   // ---- Message Editing -------
   socket.on('editMessage', async ({ messageId, newText, room }) => {
