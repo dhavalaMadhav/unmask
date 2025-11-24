@@ -31,15 +31,18 @@ const userSchema = new mongoose.Schema({
   }
 });
 
-// Duplicate indexes removed because "unique: true" on fields will create indexes automatically.
-// So no need for userSchema.index({ email: 1 }) or userSchema.index({ anonName: 1 }).
-
 // Updated Message Schema with Edit Tracking
 const messageSchema = new mongoose.Schema({
   room: {
     type: String,
     required: true,
-    enum: ['anxiety-support', 'career-doubts', 'relationship-issues', 'self-esteem-help', 'open-lounge']
+    enum: [
+      'anxiety-support',
+      'career-doubts',
+      'relationship-issues',
+      'self-esteem-help',
+      'open-lounge'
+    ]
   },
   senderAnonName: {
     type: String,
@@ -55,28 +58,27 @@ const messageSchema = new mongoose.Schema({
     enum: ['text', 'image', 'file', 'audio'],
     default: 'text'
   },
+
+  // ⬇️ Ciphertext instead of plaintext
   message: {
     type: String,
     required: true,
     maxlength: 5000000
   },
-  fileName: {
-    type: String
+
+  // ⬇️ Needed for AES-GCM decryption
+  iv: {
+    type: String,
+    default: null
   },
-  fileSize: {
-    type: Number
-  },
-  isEdited: {
-    type: Boolean,
-    default: false
-  },
-  editedAt: {
-    type: Date
-  },
-  timestamp: {
-    type: Date,
-    default: Date.now
-  }
+
+  fileName: String,
+  fileSize: Number,
+
+  isEdited: { type: Boolean, default: false },
+  editedAt: Date,
+
+  timestamp: { type: Date, default: Date.now }
 });
 
 // Indexes for performance

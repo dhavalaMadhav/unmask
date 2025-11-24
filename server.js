@@ -334,47 +334,54 @@ io.to(room).emit('onlineUsers', onlineUsers);
   });
 
   // ---- Message Creation -----
-  socket.on('message', async ({ room, text, type = 'text', fileName, fileSize }) => {
-    try {
-      const now = Date.now();
-      messageTimestamps.push(now);
-      const recentMessages = messageTimestamps.filter(t => now - t < 10000);
-      if (recentMessages.length > 10) {
-        socket.emit('error', { message: 'Slow down! Too many messages.' });
-        return;
-      }
-      if (!text) return;
-      const message = new Message({
-        room,
-        senderAnonName: socket.anonName,
-        senderUserId: socket.userId,
-        messageType: type,
-        message: text,
-        fileName: fileName || null,
-        fileSize: fileSize || null
-      });
-      await message.save();
-io.to(room).emit('message', {
-  messageId: message._id.toString(),
-  anonName: socket.anonName,
-  profileImage: socket.profileImage,  // <-- Include profileImage here for clients
-  userId: socket.userId,
-  message: text,
-  messageType: type,
-  fileName: fileName,
-  isEdited: false,
-  timestamp: message.timestamp
-});
-
-
-      socket.to(room).emit('notification', {
-        message: `${socket.anonName} sent a message`,
-        room: room
-      });
-    } catch (error) {
-      socket.emit('error', { message: 'Failed to send message' });
+socket.on('message', async ({ room, text, type = 'text', fileName, fileSize, iv }) => {
+  try {
+    const now = Date.now();
+    messageTimestamps.push(now);
+    const recentMessages = messageTimestamps.filter(t => now - t < 10000);
+    if (recentMessages.length > 10) {
+      socket.emit('error', { message: 'Slow down! Too many messages.' });
+      return;
     }
-  });
+
+    if (!text) return; // text = ciphertext (or plaintext if not encrypted)
+
+    const message = new Message({
+      room,
+      senderAnonName: socket.anonName,
+      senderUserId: socket.userId,
+      messageType: type,
+      message: text,          // ciphertext base64
+      iv: iv || null,         // store IV if provided
+      fileName: fileName || null,
+      fileSize: fileSize || null
+    });
+
+    await message.save();
+
+    io.to(room).emit('message', {
+      messageId: message._id.toString(),
+      anonName: socket.anonName,
+      profileImage: socket.profileImage,
+      userId: socket.userId,
+      message: text,          // ciphertext
+      iv: iv || null,         // send IV to clients
+      messageType: type,
+      fileName: fileName,
+      fileSize: fileSize,
+      isEdited: false,
+      timestamp: message.timestamp
+    });
+
+    socket.to(room).emit('notification', {
+      message: `${socket.anonName} sent a message`,
+      room: room
+    });
+  } catch (error) {
+    console.error(error);
+    socket.emit('error', { message: 'Failed to send message' });
+  }
+});
 
   socket.on('typing', ({ room }) => {
     socket.to(room).emit('typing', { anonName: socket.anonName });

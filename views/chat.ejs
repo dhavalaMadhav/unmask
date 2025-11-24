@@ -54,6 +54,26 @@
   align-items: center;
   margin-left: auto; /* This pushes the buttons to the right */
 }
+.encryption-status {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  margin-left: 1rem;
+  letter-spacing: 0.05em;
+  transition: all 0.25s ease;
+  border: 1px solid black;
+}
+
+.encryption-on {
+  background: rgba(0, 200, 0, 0.15);
+  color: #008800;
+}
+
+.encryption-off {
+  background: rgba(255, 165, 0, 0.2);
+  color: #CC6600;
+}
 
 /* Keep the rest of your existing header styles */
 .btn-back, .btn-settings {
@@ -1218,7 +1238,8 @@
 <div class="header">
   <!-- Title on the left -->
   <h1 id="room-name">LOADING...</h1>
-  
+  <div id="encryption-status" class="encryption-status">Checking encryption...</div>
+
   <!-- Buttons on the right -->
   <div class="header-actions">
     <a class="btn-settings" id="settings-btn">
@@ -1388,6 +1409,118 @@ Settings
   const currentRoomName = localStorage.getItem('currentRoomName');
   let myUserId = localStorage.getItem('userId');
 
+  // --- E2EE CONFIG ---
+let encryptionEnabled = false;
+let roomKey = null; // CryptoKey for AES-GCM
+
+function bufToBase64(buf) {
+  const bytes = new Uint8Array(buf);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+function base64ToBuf(b64) {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+async function deriveRoomKeyFromPassphrase(passphrase, roomId) {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(passphrase),
+    'PBKDF2',
+    false,
+    ['deriveKey']
+  );
+
+  const key = await crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: enc.encode('UNMASK-' + roomId), // room-specific salt
+      iterations: 100000,
+      hash: 'SHA-256'
+    },
+    keyMaterial,
+    {
+      name: 'AES-GCM',
+      length: 256
+    },
+    false,
+    ['encrypt', 'decrypt']
+  );
+
+  return key;
+}
+
+async function encryptString(plain) {
+  if (!roomKey) throw new Error('No room key set');
+  const enc = new TextEncoder();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    roomKey,
+    enc.encode(plain)
+  );
+
+  return {
+    iv: bufToBase64(iv.buffer),
+    ciphertext: bufToBase64(ciphertext)
+  };
+}
+
+async function decryptString(ciphertextB64, ivB64) {
+  if (!roomKey) throw new Error('No room key set');
+  const dec = new TextDecoder();
+  const iv = new Uint8Array(base64ToBuf(ivB64));
+  const ciphertext = base64ToBuf(ciphertextB64);
+
+  const plainBuf = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv },
+    roomKey,
+    ciphertext
+  );
+
+  return dec.decode(plainBuf);
+}
+
+// Ask user for room passphrase (optional)
+async function initEncryption() {
+  if (!window.crypto || !window.crypto.subtle) {
+    console.warn('Web Crypto not supported; E2EE disabled.');
+    return;
+  }
+
+  const passphrase = window.prompt(
+    'Optional: Enter a room secret for end-to-end encryption.\n' +
+    'Everyone in this room must enter the same secret.\n' +
+    'Leave blank to disable encryption.'
+  );
+
+  if (!passphrase) {
+    encryptionEnabled = false;
+    return;
+  }
+
+  try {
+    roomKey = await deriveRoomKeyFromPassphrase(passphrase, currentRoom);
+    encryptionEnabled = true;
+    console.log('E2EE enabled for this room.');
+  } catch (err) {
+    console.error('Failed to derive room key:', err);
+    encryptionEnabled = false;
+  }
+}
+
+
   // Image Modal Functions
 const imageModal = document.getElementById('image-modal');
 const modalImg = document.getElementById('modal-image');
@@ -1541,12 +1674,8 @@ document.querySelectorAll('.settings-tab').forEach(tab => {
 // Update the load functions to handle the tab interface
 async function loadImages() {
   try {
-    const response = await fetch(`${API_URL}/chat/messages/${currentRoom}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    
-    const data = await response.json();
-    const images = data.messages.filter(msg => msg.messageType === 'image');
+const messages = await fetchRoomMessages();
+const images = messages.filter(msg => msg.messageType === 'image');
     
     const imagesGrid = document.getElementById('images-grid');
     const noImages = document.getElementById('no-images');
@@ -1579,12 +1708,9 @@ async function loadImages() {
 
 async function loadFiles() {
   try {
-    const response = await fetch(`${API_URL}/chat/messages/${currentRoom}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    
-    const data = await response.json();
-    const files = data.messages.filter(msg => msg.messageType === 'file');
+    const messages = await fetchRoomMessages();
+    const files = messages.filter(msg => msg.messageType === 'file');
+
     
     const filesList = document.getElementById('files-list');
     const noFiles = document.getElementById('no-files');
@@ -1630,12 +1756,8 @@ async function loadFiles() {
 
 async function loadAudio() {
   try {
-    const response = await fetch(`${API_URL}/chat/messages/${currentRoom}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    
-    const data = await response.json();
-    const audioMessages = data.messages.filter(msg => msg.messageType === 'audio');
+  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+  document.querySelector('.tab[onclick*="audio"]').classList.add('active');
     
     const audioList = document.getElementById('audio-list');
     const noAudio = document.getElementById('no-audio');
@@ -2048,22 +2170,43 @@ function exitDeleteMode() {
       closeAllDropdowns();
     }
   });
+async function fetchRoomMessages() {
+  const response = await fetch(`${API_URL}/chat/messages/${currentRoom}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
 
-  async function loadChatHistory() {
-    try {
-      const response = await fetch(`${API_URL}/chat/messages/${currentRoom}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+  const data = await response.json();
+  const messages = data.messages || [];
 
-      const data = await response.json();
-      displayMessages(data.messages);
-      scrollToBottom();
-    } catch (error) {
-      console.error('Error loading chat history:', error);
+  if (!encryptionEnabled || !roomKey) {
+    return messages;
+  }
+
+  // Decrypt messages that have iv
+  for (const msg of messages) {
+    if (msg.iv && typeof msg.message === 'string') {
+      try {
+        msg.message = await decryptString(msg.message, msg.iv);
+      } catch (err) {
+        console.warn('Failed to decrypt message', msg._id, err);
+        // leave ciphertext as-is (will look like gibberish)
+      }
     }
   }
+
+  return messages;
+}
+
+async function loadChatHistory() {
+  try {
+    const messages = await fetchRoomMessages();
+    displayMessages(messages);
+    scrollToBottom();
+  } catch (error) {
+    console.error('Error loading chat history:', error);
+  }
+}
+
 
   function displayMessages(messages) {
     messagesContainer.innerHTML = '';
@@ -2275,10 +2418,21 @@ function createMessageGroup(userId, authorName, profileImage) {
     socket.emit('joinRoom', { room: currentRoom });
   });
 
-  socket.on('message', (data) => {
-    addNewMessage(data);
-    scrollToBottom();
-  });
+socket.on('message', async (data) => {
+  // If encryption is enabled and message includes iv, try to decrypt
+  if (encryptionEnabled && data.iv && typeof data.message === 'string') {
+    try {
+      data.message = await decryptString(data.message, data.iv);
+    } catch (err) {
+      console.warn('Failed to decrypt live message', data.messageId, err);
+    }
+  }
+
+  addNewMessage(data);
+  scrollToBottom();
+  updateEncryptionUI();
+});
+
 
   function addNewMessage(data) {
     const lastGroup = messagesContainer.lastElementChild;
@@ -2404,50 +2558,64 @@ function createMessageGroup(userId, authorName, profileImage) {
     alert(data.message);
   });
 
-  function sendMessage(data = null, type = 'text', fileName = null, fileSize = null) {
-    let messageData;
+async function sendMessage(data = null, type = 'text', fileName = null, fileSize = null) {
+  let messageData;
 
-    if (data) {
-      messageData = data;
-    } else if (selectedFile) {
-      messageData = selectedFile.data;
-      type = selectedFileType;
-      fileName = selectedFile.name;
-      fileSize = selectedFile.size;
-    } else {
-      const text = messageInput.value.trim();
-      if (!text) return;
-      messageData = text;
-    }
-
-    const messagePayload = { 
-      room: currentRoom, 
-      text: messageData,
-      type: type,
-      fileName: fileName,
-      fileSize: fileSize
-    };
-
-    // Add reply data if replying to a message
-    if (replyingTo && replyMessageData) {
-      messagePayload.replyTo = replyMessageData;
-    }
-
-    socket.emit('message', messagePayload);
-
-    messageInput.value = '';
-    selectedFile = null;
-    document.getElementById('file-preview').classList.remove('active');
-    document.getElementById('file-input').value = '';
-    document.getElementById('image-input').value = '';
-    
-    // Clear reply preview
-    replyPreview.classList.remove('active');
-    replyingTo = null;
-    replyMessageData = null;
-    
-    socket.emit('stopTyping', { room: currentRoom });
+  if (data) {
+    messageData = data;
+  } else if (selectedFile) {
+    messageData = selectedFile.data;
+    type = selectedFileType;
+    fileName = selectedFile.name;
+    fileSize = selectedFile.size;
+  } else {
+    const text = messageInput.value.trim();
+    if (!text) return;
+    messageData = text;
   }
+
+  let payloadText = messageData;
+  let iv = null;
+
+  if (encryptionEnabled && roomKey) {
+    try {
+      const encrypted = await encryptString(String(messageData));
+      payloadText = encrypted.ciphertext;
+      iv = encrypted.iv;
+    } catch (err) {
+      console.error('Failed to encrypt message, sending plaintext fallback:', err);
+      // if you want, you can `return` here instead of falling back
+    }
+  }
+
+  const messagePayload = { 
+    room: currentRoom, 
+    text: payloadText,
+    type: type,
+    fileName: fileName,
+    fileSize: fileSize,
+    iv: iv
+  };
+
+  if (replyingTo && replyMessageData) {
+    messagePayload.replyTo = replyMessageData;
+  }
+
+  socket.emit('message', messagePayload);
+
+  messageInput.value = '';
+  selectedFile = null;
+  document.getElementById('file-preview').classList.remove('active');
+  document.getElementById('file-input').value = '';
+  document.getElementById('image-input').value = '';
+  
+  replyPreview.classList.remove('active');
+  replyingTo = null;
+  replyMessageData = null;
+  
+  socket.emit('stopTyping', { room: currentRoom });
+}
+
 
   sendBtn.addEventListener('click', () => sendMessage());
   messageInput.addEventListener('keypress', (e) => {
@@ -2504,9 +2672,31 @@ function createMessageGroup(userId, authorName, profileImage) {
     }
   }
 
-  fetchUserId().then(() => {
-    loadChatHistory();
-  });
+  function updateEncryptionUI() {
+  const el = document.getElementById('encryption-status');
+  if (!el) return;
+
+  if (encryptionEnabled && roomKey) {
+    el.textContent = "Encrypted 🔐";
+    el.classList.add("encryption-on");
+    el.classList.remove("encryption-off");
+  } else {
+    el.textContent = "Not Encrypted ⚠️";
+    el.classList.add("encryption-off");
+    el.classList.remove("encryption-on");
+  }
+}
+
+
+(async () => {
+await initEncryption();
+updateEncryptionUI();
+await fetchUserId();
+await loadChatHistory();
+updateEncryptionUI(); // ensure state after history loaded
+})();
+
+
 
   window.addEventListener('beforeunload', () => {
     socket.emit('leaveRoom', { room: currentRoom });
